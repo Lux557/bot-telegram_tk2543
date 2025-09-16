@@ -12,7 +12,7 @@ moderation_storage = {}
 
 # Используйте переменные окружения для ТОКЕНА в целях безопасности
 # Если переменная окружения не установлена, будет использовано значение по умолчанию
-TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
+TOKEN = os.getenv('TOKEN', 'YOUR_BOT_TOKEN_HERE')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1003098265954
 
@@ -108,7 +108,7 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
 
 # --- Код для вебхуков ---
 WEBHOOK_PATH = f"/bot/{TOKEN}"
-WEB_SERVER_HOST = "44.229.227.142"
+WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
 async def on_startup(dp: Dispatcher):
@@ -140,4 +140,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
