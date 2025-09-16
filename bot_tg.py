@@ -15,7 +15,7 @@ moderation_storage = {}
 # NOTE: It's highly recommended to use environment variables for the TOKEN and other sensitive data
 TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
-CHANNEL_ID = -1002911613947
+CHANNEL_ID = -1003098265954
 
 # Admin keyboard
 moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -112,7 +112,7 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
 # This part replaces dp.start_polling
 # You will get this URL from Render after you deploy your bot.
 # The webhook path is important. Use a secret path to avoid spam.
-WEBHOOK_PATH = f"/bot/{TOKEN}" 
+WEBHOOK_PATH = f"/bot/{53dc5d369033c78b36666ec405f12acb}" 
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
@@ -149,3 +149,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
