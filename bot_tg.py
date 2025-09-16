@@ -30,35 +30,32 @@ bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 # Обработчики сообщений и колбэков
 @dp.message(F.text | F.photo | F.video)
 async def handle_user_message(message: Message, bot: Bot):
-    admin_message_text = "Новое анонимное сообщение:\n\n"
-    if message.text:
-        admin_message_text += message.text
-    elif message.photo:
-        admin_message_text += message.caption if message.caption else "(Сообщение содержит фото)"
-    elif message.video:
-        admin_message_text += message.caption if message.caption else "(Сообщение содержит видео)"
+    # Если сообщение содержит фото, видео или текст
+    if message.photo or message.video or message.text:
+        admin_messages = {}
+        for admin_id in ADMIN_IDS:
+            try:
+                # Отправляем сообщение администратору, которое содержит фото или видео,
+                # и добавляем к нему inline-клавиатуру
+                copied_message = await bot.copy_message(
+                    chat_id=admin_id,
+                    from_chat_id=message.chat.id,
+                    message_id=message.message_id,
+                    reply_markup=moderation_keyboard
+                )
+                admin_messages[admin_id] = copied_message.message_id
+            except Exception as e:
+                print(f"Failed to copy message to admin {admin_id}: {e}")
 
-    admin_messages = {}
-    for admin_id in ADMIN_IDS:
-        try:
-            moderation_message = await bot.send_message(
-                admin_id,
-                admin_message_text,
-                reply_markup=moderation_keyboard
-            )
-            admin_messages[admin_id] = moderation_message.message_id
-        except Exception as e:
-            print(f"Failed to send message to admin {admin_id}: {e}")
-
-    first_admin_message_id = admin_messages[ADMIN_IDS[0]] if ADMIN_IDS else None
-    if first_admin_message_id:
-        moderation_storage[first_admin_message_id] = {
-            'chat_id': message.chat.id,
-            'message_id': message.message_id,
-            'content_type': message.content_type,
-            'admin_messages': admin_messages
-        }
-    await message.answer('✅ Ваше сообщение на одобрении у администрации.')
+        first_admin_message_id = admin_messages[ADMIN_IDS[0]] if ADMIN_IDS else None
+        if first_admin_message_id:
+            moderation_storage[first_admin_message_id] = {
+                'chat_id': message.chat.id,
+                'message_id': message.message_id,
+                'content_type': message.content_type,
+                'admin_messages': admin_messages
+            }
+        await message.answer('✅ Ваше сообщение на одобрении у администрации.')
 
 @dp.callback_query(F.data == 'approve')
 async def approve_message(callback_query: CallbackQuery, bot: Bot):
@@ -140,4 +137,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
