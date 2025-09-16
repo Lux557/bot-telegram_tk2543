@@ -13,7 +13,7 @@ moderation_storage = {}
 # Use environment variables for the TOKEN for security
 TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
-CHANNEL_ID = -1002911613947
+CHANNEL_ID = -1003098265954
 
 # Admin keyboard
 moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -62,7 +62,6 @@ async def handle_user_message(message: Message, bot: Bot):
 @dp.callback_query(F.data == 'approve')
 async def approve_message(callback_query: CallbackQuery, bot: Bot):
     message_info = moderation_storage.get(callback_query.message.message_id)
-
     if message_info:
         try:
             await bot.copy_message(
@@ -106,15 +105,18 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
             message_id=callback_query.message.message_id
         )
 
-# --- WEBHOOK-RELATED CODE ---
-# This part replaces dp.start_polling
-WEBHOOK_PATH = f"/bot/{TOKEN}" 
+---
+### Webhook-Related Code
+
+###The code below replaces your `asyncio.run(main())` block. It sets up the web server for your bot to work on Render.
+
+WEBHOOK_PATH = f"/bot/{TOKEN}"
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
 async def on_startup(dp: Dispatcher):
     WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
-    print(f"Setting webhook URL to {WEBHOOK_URL}")
+    print(f"https://api.render.com/deploy/srv-d34puv56ubrc73cks68g?key=k6TzN9WJWOY")
     await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
 
 async def on_shutdown(dp: Dispatcher):
