@@ -16,10 +16,14 @@ ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1003098265954
 
 # Клавиатура для админа
+# Теперь с кнопкой-ссылкой
 moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='✅ Принять', callback_data='approve'),
         InlineKeyboardButton(text='❌ Отклонить', callback_data='decline')
+    ],
+    [
+        InlineKeyboardButton(text='▶️ Открыть в браузере', url='https://api.telegram.org/bot8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ/setWebhook?url=https://bot-telegram-tk2543.onrender.com/bot/8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
     ]
 ])
 
@@ -128,4 +132,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
