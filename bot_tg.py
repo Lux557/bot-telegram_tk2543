@@ -5,16 +5,17 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
-# Временное хранилище для сообщений на модерацию
+# Temporary storage for moderation messages
 moderation_storage = {}
 
-# Используйте переменные окружения для ТОКЕНА в целях безопасности
+# Use environment variables for the TOKEN for security
 TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1002911613947
 
-# Клавиатура для админа
+# Admin keyboard
 moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='✅ Принять', callback_data='approve'),
@@ -25,7 +26,7 @@ moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 dp = Dispatcher()
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-# Обработчики остаются без изменений
+# Handlers remain the same
 @dp.message(F.text | F.photo | F.video)
 async def handle_user_message(message: Message, bot: Bot):
     admin_message_text = "Новое анонимное сообщение:\n\n"
@@ -105,11 +106,9 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
             message_id=callback_query.message.message_id
         )
 
-# --- КОД ДЛЯ ВЕБХУКОВ ---
-# Эта часть заменяет dp.start_polling
-from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
-
-WEBHOOK_PATH = f"/bot/{TOKEN}"  
+# --- WEBHOOK-RELATED CODE ---
+# This part replaces dp.start_polling
+WEBHOOK_PATH = f"/bot/{TOKEN}" 
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
@@ -126,7 +125,7 @@ async def on_shutdown(dp: Dispatcher):
 def main():
     app = web.Application()
 
-    # Правильный способ регистрации обработчика вебхуков для aiogram v3+
+    # The correct way to register a webhook handler for aiogram v3+
     request_handler = SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
@@ -134,7 +133,7 @@ def main():
     )
     request_handler.register(app, path=WEBHOOK_PATH)
 
-    # Правильный способ регистрации обработчиков запуска и остановки
+    # Correctly set up the application with startup and shutdown handlers
     setup_application(app, dp, bot=bot)
 
     web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
