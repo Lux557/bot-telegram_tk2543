@@ -11,8 +11,7 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 moderation_storage = {}
 
 # Используйте переменные окружения для ТОКЕНА в целях безопасности
-# Если переменная окружения не установлена, будет использовано значение по умолчанию
-TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
+TOKEN = os.getenv('TOKEN', 'ВАШ_ТОКЕН_БОТА_ЗДЕСЬ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1003098265954
 
@@ -30,13 +29,10 @@ bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 # Обработчики сообщений и колбэков
 @dp.message(F.text | F.photo | F.video)
 async def handle_user_message(message: Message, bot: Bot):
-    # Если сообщение содержит фото, видео или текст
     if message.photo or message.video or message.text:
         admin_messages = {}
         for admin_id in ADMIN_IDS:
             try:
-                # Отправляем сообщение администратору, которое содержит фото или видео,
-                # и добавляем к нему inline-клавиатуру
                 copied_message = await bot.copy_message(
                     chat_id=admin_id,
                     from_chat_id=message.chat.id,
@@ -74,15 +70,13 @@ async def approve_message(callback_query: CallbackQuery, bot: Bot):
                     print(f"Failed to delete message for admin {admin_id}: {e}")
             del moderation_storage[callback_query.message.message_id]
         except Exception as e:
-            await bot.edit_message_text(
-                f'❌ Не удалось опубликовать сообщение. Ошибка: {e}',
-                chat_id=str(callback_query.from_user.id),
-                message_id=callback_query.message.message_id
+            await bot.send_message(
+                chat_id=callback_query.from_user.id,
+                text=f'❌ Не удалось опубликовать сообщение. Ошибка: {e}'
             )
     else:
-        await bot.edit_message_text(
-            '⚠️ Это сообщение уже было обработано.',
-            chat_id=str(callback_query.from_user.id),
+        await bot.delete_message(
+            chat_id=callback_query.from_user.id,
             message_id=callback_query.message.message_id
         )
 
@@ -97,9 +91,8 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
                 print(f"Failed to delete message for admin {admin_id}: {e}")
         moderation_storage.pop(callback_query.message.message_id, None)
     else:
-        await bot.edit_message_text(
-            '⚠️ Это сообщение уже было обработано.',
-            chat_id=str(callback_query.from_user.id),
+        await bot.delete_message(
+            chat_id=callback_query.from_user.id,
             message_id=callback_query.message.message_id
         )
 
@@ -121,7 +114,6 @@ async def on_shutdown(dp: Dispatcher):
 def main():
     app = web.Application()
 
-    # Правильная регистрация обработчика вебхуков для aiogram v3+
     request_handler = SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
@@ -129,7 +121,6 @@ def main():
     )
     request_handler.register(app, path=WEBHOOK_PATH)
 
-    # Правильная регистрация обработчиков запуска и остановки
     setup_application(app, dp, bot=bot)
 
     web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
@@ -137,5 +128,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
