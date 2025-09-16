@@ -112,7 +112,7 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
 # This part replaces dp.start_polling
 # You will get this URL from Render after you deploy your bot.
 # The webhook path is important. Use a secret path to avoid spam.
-WEBHOOK_PATH = f"/bot/{53dc5d369033c78b36666ec405f12acb}" 
+WEBHOOK_PATH = f"/bot/53dc5d369033c78b36666ec405f12acb}" 
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
