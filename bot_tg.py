@@ -7,15 +7,16 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
-# Temporary storage for moderation messages
+# Временное хранилище для сообщений на модерацию
 moderation_storage = {}
 
-# Use environment variables for the TOKEN for security
+# Используйте переменные окружения для ТОКЕНА в целях безопасности
+# Если переменная окружения не установлена, будет использовано значение по умолчанию
 TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1003098265954
 
-# Admin keyboard
+# Клавиатура для админа
 moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='✅ Принять', callback_data='approve'),
@@ -26,7 +27,7 @@ moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 dp = Dispatcher()
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-# Handlers remain the same
+# Обработчики сообщений и колбэков
 @dp.message(F.text | F.photo | F.video)
 async def handle_user_message(message: Message, bot: Bot):
     admin_message_text = "Новое анонимное сообщение:\n\n"
@@ -105,18 +106,14 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
             message_id=callback_query.message.message_id
         )
 
----
-### Webhook-Related Code
-
-###The code below replaces your `asyncio.run(main())` block. It sets up the web server for your bot to work on Render.
-
+# --- Код для вебхуков ---
 WEBHOOK_PATH = f"/bot/{TOKEN}"
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
 async def on_startup(dp: Dispatcher):
     WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
-    print(f"https://api.render.com/deploy/srv-d34puv56ubrc73cks68g?key=k6TzN9WJWOY")
+    print(f"Setting webhook URL to {WEBHOOK_URL}")
     await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
 
 async def on_shutdown(dp: Dispatcher):
@@ -127,7 +124,7 @@ async def on_shutdown(dp: Dispatcher):
 def main():
     app = web.Application()
 
-    # The correct way to register a webhook handler for aiogram v3+
+    # Правильная регистрация обработчика вебхуков для aiogram v3+
     request_handler = SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
@@ -135,7 +132,7 @@ def main():
     )
     request_handler.register(app, path=WEBHOOK_PATH)
 
-    # Correctly set up the application with startup and shutdown handlers
+    # Правильная регистрация обработчиков запуска и остановки
     setup_application(app, dp, bot=bot)
 
     web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
