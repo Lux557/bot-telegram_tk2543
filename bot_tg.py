@@ -12,7 +12,7 @@ moderation_storage = {}
 
 # Используйте переменные окружения для ТОКЕНА в целях безопасности
 # Если переменная окружения не установлена, будет использовано значение по умолчанию
-TOKEN = os.getenv('TOKEN', 'YOUR_BOT_TOKEN_HERE')
+TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1003098265954
 
@@ -140,3 +140,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
