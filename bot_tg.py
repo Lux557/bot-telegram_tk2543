@@ -136,7 +136,7 @@ async def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     
-    app.router.add_post(WEBHOOK_PATH, dp.web_hook_handler)
+    app.router.add_post(WEBHOOK_PATH, dp.webhook_handler)
 
     runner = web.AppRunner(app)
     await runner.setup()
@@ -149,5 +149,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 
