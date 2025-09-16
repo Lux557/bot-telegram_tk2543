@@ -107,7 +107,9 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
 
 # --- КОД ДЛЯ ВЕБХУКОВ ---
 # Эта часть заменяет dp.start_polling
-WEBHOOK_PATH = f"/bot/{TOKEN}" 
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+
+WEBHOOK_PATH = f"/bot/{TOKEN}"  
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
@@ -123,17 +125,20 @@ async def on_shutdown(dp: Dispatcher):
 
 def main():
     app = web.Application()
-    app.router.add_post(WEBHOOK_PATH, dp.webhook_handler)
 
-    dp.startup.register(on_startup)
-    dp.shutdown.register(on_shutdown)
-    
+    # Правильный способ регистрации обработчика вебхуков для aiogram v3+
+    request_handler = SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot,
+        handle_in_background=True
+    )
+    request_handler.register(app, path=WEBHOOK_PATH)
+
+    # Правильный способ регистрации обработчиков запуска и остановки
+    setup_application(app, dp, bot=bot)
+
     web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
