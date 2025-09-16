@@ -11,7 +11,7 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 moderation_storage = {}
 
 # Используйте переменные окружения для ТОКЕНА в целях безопасности
-TOKEN = os.getenv('TOKEN', 'ВАШ_ТОКЕН_БОТА_ЗДЕСЬ')
+TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1003098265954
 
@@ -128,3 +128,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
