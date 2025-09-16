@@ -108,7 +108,7 @@ async def decline_message(callback_query: CallbackQuery, bot: Bot):
 
 # --- Код для вебхуков ---
 WEBHOOK_PATH = f"/bot/{TOKEN}"
-WEB_SERVER_HOST = "0.0.0.0"
+WEB_SERVER_HOST = "44.229.227.142"
 WEB_SERVER_PORT = int(os.environ.get("PORT", 5000))
 
 async def on_startup(dp: Dispatcher):
@@ -140,3 +140,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
