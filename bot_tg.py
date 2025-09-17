@@ -13,7 +13,7 @@ moderation_storage = {}
 # Используйте переменные окружения для ТОКЕНА в целях безопасности
 TOKEN = os.getenv('TOKEN', '8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
 ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
-CHANNEL_ID = -1003098265954
+CHANNEL_ID = -1002911613947
 
 # Клавиатура для админа
 moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
