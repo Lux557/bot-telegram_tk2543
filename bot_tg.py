@@ -16,86 +16,114 @@ ADMIN_IDS = [928321599, 8117211008, 1039676430, 860561862, 1480128887]
 CHANNEL_ID = -1003098265954
 
 # Клавиатура для админа
-# Теперь с кнопкой-ссылкой
 moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='✅ Принять', callback_data='approve'),
         InlineKeyboardButton(text='❌ Отклонить', callback_data='decline')
-    ],
-    [
-        InlineKeyboardButton(text='▶️ Открыть в браузере', url='https://api.telegram.org/bot8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ/setWebhook?url=https://bot-telegram-tk2543.onrender.com/bot/8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
-        InlineKeyboardButton(text='', url='https://api.telegram.org/bot8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ/setWebhook?url=https://bot-telegram-tk2543.onrender.com/bot/8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
     ]
 ])
 
 dp = Dispatcher()
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
+# Генерация уникального ID для сообщения
+def generate_moderation_id():
+    import uuid
+    return str(uuid.uuid4())
+
 # Обработчики сообщений и колбэков
 @dp.message(F.text | F.photo | F.video)
 async def handle_user_message(message: Message, bot: Bot):
     if message.photo or message.video or message.text:
+        moderation_id = generate_moderation_id()
         admin_messages = {}
+        
         for admin_id in ADMIN_IDS:
             try:
+                # Создаем клавиатуру с уникальным callback_data для каждого сообщения
+                admin_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                    [
+                        InlineKeyboardButton(text='✅ Принять', callback_data=f'approve_{moderation_id}'),
+                        InlineKeyboardButton(text='❌ Отклонить', callback_data=f'decline_{moderation_id}')
+                    ]
+                ])
+                
                 copied_message = await bot.copy_message(
                     chat_id=admin_id,
                     from_chat_id=message.chat.id,
                     message_id=message.message_id,
-                    reply_markup=moderation_keyboard
+                    reply_markup=admin_keyboard
                 )
                 admin_messages[admin_id] = copied_message.message_id
             except Exception as e:
                 print(f"Failed to copy message to admin {admin_id}: {e}")
 
-        first_admin_message_id = admin_messages[ADMIN_IDS[0]] if ADMIN_IDS else None
-        if first_admin_message_id:
-            moderation_storage[first_admin_message_id] = {
-                'chat_id': message.chat.id,
-                'message_id': message.message_id,
-                'content_type': message.content_type,
-                'admin_messages': admin_messages
-            }
+        # Сохраняем информацию о сообщении с уникальным ID
+        moderation_storage[moderation_id] = {
+            'chat_id': message.chat.id,
+            'message_id': message.message_id,
+            'content_type': message.content_type,
+            'admin_messages': admin_messages,
+            'moderation_id': moderation_id
+        }
+        
         await message.answer('✅ Ваше сообщение на одобрении у администрации.')
 
-@dp.callback_query(F.data == 'approve')
+@dp.callback_query(F.data.startswith('approve_'))
 async def approve_message(callback_query: CallbackQuery, bot: Bot):
-    message_info = moderation_storage.get(callback_query.message.message_id)
+    moderation_id = callback_query.data.split('_')[1]
+    message_info = moderation_storage.get(moderation_id)
+    
     if message_info:
         try:
+            # Отправляем сообщение в канал
             await bot.copy_message(
                 chat_id=CHANNEL_ID,
                 from_chat_id=message_info['chat_id'],
                 message_id=message_info['message_id']
             )
+            
+            # Удаляем сообщения у всех администраторов
             for admin_id, mod_msg_id in message_info['admin_messages'].items():
                 try:
                     await bot.delete_message(chat_id=admin_id, message_id=mod_msg_id)
                 except Exception as e:
                     print(f"Failed to delete message for admin {admin_id}: {e}")
-            del moderation_storage[callback_query.message.message_id]
+            
+            # Удаляем из хранилища
+            del moderation_storage[moderation_id]
+            
+            # Отправляем подтверждение админу
+            await callback_query.answer('Сообщение опубликовано в канале!')
+            
         except Exception as e:
-            await bot.send_message(
-                chat_id=callback_query.from_user.id,
-                text=f'❌ Не удалось опубликовать сообщение. Ошибка: {e}'
-            )
+            await callback_query.answer(f'❌ Ошибка: {e}')
     else:
+        await callback_query.answer('Сообщение уже обработано или не найдено')
         await bot.delete_message(
             chat_id=callback_query.from_user.id,
             message_id=callback_query.message.message_id
         )
 
-@dp.callback_query(F.data == 'decline')
+@dp.callback_query(F.data.startswith('decline_'))
 async def decline_message(callback_query: CallbackQuery, bot: Bot):
-    if callback_query.message.message_id in moderation_storage:
-        message_info = moderation_storage.get(callback_query.message.message_id)
+    moderation_id = callback_query.data.split('_')[1]
+    message_info = moderation_storage.get(moderation_id)
+    
+    if message_info:
+        # Удаляем сообщения у всех администраторов
         for admin_id, mod_msg_id in message_info['admin_messages'].items():
             try:
                 await bot.delete_message(chat_id=admin_id, message_id=mod_msg_id)
             except Exception as e:
                 print(f"Failed to delete message for admin {admin_id}: {e}")
-        moderation_storage.pop(callback_query.message.message_id, None)
+        
+        # Удаляем из хранилища
+        moderation_storage.pop(moderation_id, None)
+        
+        await callback_query.answer('Сообщение отклонено!')
     else:
+        await callback_query.answer('Сообщение уже обработано или не найдено')
         await bot.delete_message(
             chat_id=callback_query.from_user.id,
             message_id=callback_query.message.message_id
@@ -129,7 +157,6 @@ def main():
     setup_application(app, dp, bot=bot)
 
     web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
-
 
 if __name__ == "__main__":
     main()
