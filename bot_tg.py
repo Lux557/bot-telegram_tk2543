@@ -23,7 +23,7 @@ moderation_keyboard = InlineKeyboardMarkup(inline_keyboard=[
         InlineKeyboardButton(text='❌ Отклонить', callback_data='decline')
     ],
     [
-        InlineKeyboardButton(text='▶️ Открыть в браузере', url='https://api.telegram.org/bot8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ/setWebhook?url=https://bot-telegram-tk2543.onrender.com/bot/8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
+        InlineKeyboardButton(text='', url='https://api.telegram.org/bot8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ/setWebhook?url=https://bot-telegram-tk2543.onrender.com/bot/8402137902:AAGfPEotg4Z5klNJjAeEDIH8BwPbBqV_CWQ')
     ]
 ])
 
@@ -132,3 +132,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
